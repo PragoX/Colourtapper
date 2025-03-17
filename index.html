@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ULTIMATE COLOR TAPPER</title>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+  <!-- You can include your CSS file here -->
+  <link rel="stylesheet" href="styles.css"> <!-- Assuming your CSS file is named styles.css -->
+</head>
+<body class="confetti-bg">
+  <!-- Sound toggle -->
+  <div class="sound-toggle" id="soundToggle">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </svg>
+  </div>
+
+  <!-- Game mode selector -->
+  <div class="mode-selector">
+    <button class="mode-btn active" data-mode="default">Default</button>
+    <button class="mode-btn" data-mode="disco">Disco</button>
+    <button class="mode-btn" data-mode="retro">Retro</button>
+  </div>
+
+  <!-- Main game container -->
+  <div id="game" class="game-3d">
+    <h1 class="rainbow-text">TAP THE COLOR!</h1>
+    
+    <div class="stats-container">
+      <div class="counter">
+        <div class="counter-label">TIME LEFT</div>
+        <div class="counter-value"><span id="timer">60</span>s</div>
+      </div>
+      
+      <div class="counter">
+        <div class="counter-label">SCORE</div>
+        <div class="counter-value"><span id="score">0</span></div>
+      </div>
+      
+      <div class="counter">
+        <div class="counter-label">STREAK</div>
+        <div class="counter-value"><span id="streak">0</span></div>
+      </div>
+    </div>
+    
+    <div class="difficulty-selector">
+      <div class="difficulty-button active" data-difficulty="easy">Easy</div>
+      <div class="difficulty-button" data-difficulty="medium">Medium</div>
+      <div class="difficulty-button" data-difficulty="hard">Hard</div>
+    </div>
+    
+    <div id="circle" class="pulse"></div>
+    
+    <div class="color-name neon-text" id="colorName">RED</div>
+    
+    <div id="buttons" class="buttons-container">
+      <button id="btn1" class="game-btn" onclick="checkAnswer(0)">
+        <span class="btn-effect"></span>
+        <span class="btn-text">Option 1</span>
+      </button>
+      <button id="btn2" class="game-btn" onclick="checkAnswer(1)">
+        <span class="btn-effect"></span>
+        <span class="btn-text">Option 2</span>
+      </button>
+      <button id="btn3" class="game-btn" onclick="checkAnswer(2)">
+        <span class="btn-effect"></span>
+        <span class="btn-text">Option 3</span>
+      </button>
+    </div>
+    
+    <div id="result" class="result-message"></div>
+    
+    <div class="game-stats">
+      <div class="stat-box">
+        <span class="stat-label">Correct:</span>
+        <span class="stat-value" id="correctCount">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Wrong:</span>
+        <span class="stat-value" id="wrongCount">0</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Accuracy:</span>
+        <span class="stat-value" id="accuracy">0%</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Particles container -->
+  <div class="particles" id="particles"></div>
+  
+  <!-- End screen -->
+  <div id="endScreen" class="end-screen" style="display: none;">
+    <div class="result-container">
+      <h2 class="end-title neon-text">GAME OVER!</h2>
+      
+      <div class="score-summary">
+        <div class="final-score-display">
+          <div class="score-label">FINAL SCORE</div>
+          <div class="score-value" id="finalScore">0</div>
+        </div>
+        
+        <div class="stats-summary">
+          <div class="stat-item">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-label">Highest Streak:</span>
+            <span class="stat-value" id="highestStreak">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">✓</span>
+            <span class="stat-label">Total Correct:</span>
+            <span class="stat-value" id="totalCorrect">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">✗</span>
+            <span class="stat-label">Total Wrong:</span>
+            <span class="stat-value" id="totalWrong">0</span>
+          </div>
+        </div>
+      </div>
+      
+      <p class="challenge-text">Can you top this score? Enter your details below!</p>
+      
+      <form id="scoreForm" class="score-form">
+        <div class="form-group">
+          <label for="playerName">Your Epic Name:</label>
+          <input type="text" id="playerName" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="playerEmail">Your Email:</label>
+          <input type="email" id="playerEmail" required>
+        </div>
+        
+        <button type="submit" class="submit-btn">
+          <span class="btn-effect"></span>
+          <span class="btn-text">SUBMIT SCORE</span>
+        </button>
+      </form>
+      
+      <button id="viewRankings" class="rankings-btn" style="display: none;">
+        <span class="btn-effect"></span>
+        <span class="btn-text">VIEW GLOBAL RANKINGS</span>
+      </button>
+      
+      <div id="rankings" class="rankings-container" style="display: none;">
+        <h3 class="rainbow-text">ULTIMATE LEADERBOARD</h3>
+        
+        <table id="rankingsTable">
+          <thead>
+            <tr>
+              <th>RANK</th>
+              <th>NAME</th>
+              <th>SCORE</th> <!-- Removed EMAIL column -->
+            </tr>
+          </thead>
+          <tbody id="rankingsBody"></tbody>
+        </table>
+        
+        <div class="action-buttons">
+          <button id="playAgain" class="play-again-btn">
+            <span class="btn-effect"></span>
+            <span class="btn-text">PLAY AGAIN</span>
+          </button>
+          
+          <div class="social-buttons">
+            <a href="#" class="social-button" title="Share on Twitter">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+              </svg>
+            </a>
+            <a href="#" class="social-button" title="Share on Facebook">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              </svg>
+            </a>
+            <a href="#" class="social-button" title="Share on Instagram">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- High score popup -->
+  <div id="highScoreAlert" class="high-score-alert" style="display: none;">
+    NEW HIGH SCORE! 🏆
+  </div>
+  
+  <!-- Cursor trail container -->
+  <div id="cursorTrail"></div>
+
+  <!-- Your JavaScript file can be included here -->
+  <script src="game.js"></script>
+</body>
+</html>
