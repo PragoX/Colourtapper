@@ -39,12 +39,10 @@ const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzcvxRIQ3Lf4e7iKxSB
 
 // Create play button
 function createPlayButton() {
-  // Hide the circle and color name initially
   circle.style.display = "none";
   document.getElementById("colorName").style.display = "none";
   document.getElementById("buttons").style.display = "none";
   
-  // Create play button
   const playButton = document.createElement("button");
   playButton.id = "playButton";
   playButton.className = "game-btn";
@@ -53,21 +51,14 @@ function createPlayButton() {
   playButton.style.padding = "15px 30px";
   playButton.style.marginTop = "30px";
   
-  // Add event listener to play button
   playButton.addEventListener("click", function() {
-    // Show the game elements
     circle.style.display = "block";
     document.getElementById("colorName").style.display = "block";
     document.getElementById("buttons").style.display = "flex";
-    
-    // Remove play button
     playButton.remove();
-    
-    // Start the game
     startGame();
   });
   
-  // Add the play button after the difficulty selector
   const difficultySelector = document.querySelector(".difficulty-selector");
   difficultySelector.after(playButton);
 }
@@ -85,14 +76,13 @@ function startGame() {
   wrongCountDisplay.textContent = wrongCount;
   accuracyDisplay.textContent = "0%";
   
-  // Disable difficulty buttons
   difficultyButtons.forEach(btn => {
     btn.style.opacity = "0.5";
     btn.style.pointerEvents = "none";
   });
   
   nextRound();
-  startButtonsMovement();
+  // Removed startButtonsMovement() since we want static buttons
   
   const timer = setInterval(() => {
     if (!gameActive) {
@@ -110,76 +100,22 @@ function startGame() {
   }, 1000);
 }
 
-// Start buttons movement based on difficulty
-function startButtonsMovement() {
-  if (moveInterval) {
-    clearInterval(moveInterval);
-  }
-  
-  // Set initial positions for buttons
-  const buttonsContainer = document.getElementById("buttons");
-  buttonsContainer.style.position = "relative";
-  
-  buttons.forEach(btn => {
-    btn.style.position = "relative";
-    btn.style.left = "0px";
-    btn.style.top = "0px";
-    btn.style.transition = "all 0.5s ease-in-out";
-  });
-  
-  moveInterval = setInterval(() => {
-    if (!gameActive) return;
-    
-    // Get the buttons container dimensions
-    const gameContainer = document.getElementById("game");
-    const gameRect = gameContainer.getBoundingClientRect();
-    const buttonsContainer = document.getElementById("buttons");
-    const containerRect = buttonsContainer.getBoundingClientRect();
-    
-    // Calculate available space for movement within container
-    const maxX = 100; // max pixels to move left/right
-    const maxY = 30;  // max pixels to move up/down
-    
-    // Move each button to a random position
-    buttons.forEach(btn => {
-      const randomX = Math.floor(Math.random() * maxX * 2) - maxX;
-      const randomY = Math.floor(Math.random() * maxY * 2) - maxY;
-      
-      btn.style.left = `${randomX}px`;
-      btn.style.top = `${randomY}px`;
-    });
-    
-    // Randomize the order of buttons
-    const buttonsArray = Array.from(buttons);
-    buttonsArray.sort(() => Math.random() - 0.5);
-    
-    // Rearrange buttons in DOM
-    buttonsContainer.innerHTML = '';
-    buttonsArray.forEach(btn => {
-      buttonsContainer.appendChild(btn);
-    });
-    
-  }, movementSpeed);
-}
-
-// Set difficulty
+// Set difficulty (only updates speed, no movement)
 function setDifficulty(level) {
   difficulty = level;
   
-  // Update movement speed based on difficulty
   switch (level) {
     case 'easy':
-      movementSpeed = 2000; // 2 seconds
+      movementSpeed = 2000; // Not used for movement now
       break;
     case 'medium':
-      movementSpeed = 1500; // 1.5 seconds
+      movementSpeed = 1500;
       break;
     case 'hard':
-      movementSpeed = 1000; // 1 second
+      movementSpeed = 1000;
       break;
   }
   
-  // Update active class on buttons
   difficultyButtons.forEach(btn => {
     if (btn.dataset.difficulty === level) {
       btn.classList.add('active');
@@ -193,11 +129,9 @@ function setDifficulty(level) {
 function setGameMode(mode) {
   const body = document.body;
   
-  // Remove all mode classes
   body.classList.remove('disco-mode', 'retro-mode');
   document.getElementById('game').classList.remove('retro-mode');
   
-  // Apply selected mode
   switch (mode) {
     case 'disco':
       body.classList.add('disco-mode');
@@ -207,11 +141,9 @@ function setGameMode(mode) {
       document.getElementById('game').classList.add('retro-mode');
       break;
     default:
-      // Default mode requires no additional classes
       break;
   }
   
-  // Update active class on buttons
   modeButtons.forEach(btn => {
     if (btn.dataset.mode === mode) {
       btn.classList.add('active');
@@ -223,70 +155,54 @@ function setGameMode(mode) {
 
 // Show a new round
 function nextRound() {
-  resultDisplay.textContent = "";
+  resultDisplay.textContent = ""; // Clear result text each round
 
-  // Choose a random color for the circle
   const circleColor = colors[Math.floor(Math.random() * colors.length)];
   circle.style.backgroundColor = circleColor;
 
-  // Reset circle position to center
   circle.style.position = "relative";
   circle.style.left = "0px";
   circle.style.top = "0px";
 
-  // Remove previous glow classes
   colors.forEach(color => {
     circle.classList.remove(`${color}-glow`);
   });
 
-  // Add current color glow
   circle.classList.add(`${circleColor}-glow`);
 
-  // Update the color name - deliberately choose a different color name
   const colorName = document.getElementById("colorName");
   let displayedColorName;
   do {
     displayedColorName = colors[Math.floor(Math.random() * colors.length)];
-  } while (displayedColorName === circleColor); // Make sure it's different from the circle color
+  } while (displayedColorName === circleColor);
   colorName.textContent = displayedColorName.toUpperCase();
-  colorName.style.color = circleColor; // Keep the text in the same color as the circle
+  colorName.style.color = circleColor;
 
-  // Get all available colors for the buttons
   let availableColors = [...colors];
-
-  // Choose which button will be the correct one (matching the circle's color with text color)
   correctButton = Math.floor(Math.random() * 3);
 
-  // Set up buttons
   for (let i = 0; i < 3; i++) {
-    // Reset button styling
     buttons[i].style.background = "";
-    buttons[i].style.color = ""; // Reset text color
+    buttons[i].style.color = "";
 
     let buttonTextColor;
     if (i === correctButton) {
-      // This is the correct button - set its text color to match the circle's color
       buttonTextColor = circleColor;
       buttons[i].dataset.correct = "true";
     } else {
-      // For other buttons, choose a random text color different from the circle's color
       do {
         buttonTextColor = colors[Math.floor(Math.random() * colors.length)];
       } while (buttonTextColor === circleColor);
       buttons[i].dataset.correct = "false";
     }
 
-    // Set a random color name for the button text
     let buttonColorName;
     do {
       buttonColorName = colors[Math.floor(Math.random() * colors.length)];
-    } while (buttonColorName === circleColor); // Ensure it's different from circle color for variety
+    } while (buttonColorName === circleColor);
     buttons[i].querySelector('.btn-text').textContent = buttonColorName.toUpperCase();
 
-    // Apply the determined text color to the button
     buttons[i].style.color = buttonTextColor;
-
-    // Apply gradient styling to the button
     applyButtonStyle(buttons[i]);
   }
 }
@@ -296,53 +212,45 @@ function checkAnswer(buttonIndex) {
   if (timeLeft <= 0 || !gameActive) return;
   
   if (buttons[buttonIndex].dataset.correct === "true") {
-    // Correct answer
     score++;
     streak++;
     correctCount++;
     
-    // Update highest streak
     if (streak > highestStreak) {
       highestStreak = streak;
     }
     
-    // Update displays
     scoreDisplay.textContent = score;
     streakDisplay.textContent = streak;
     correctCountDisplay.textContent = correctCount;
     
-    // Show correct feedback
     resultDisplay.textContent = "Correct!";
     resultDisplay.style.color = "#00ff00";
     
-    // Add celebration effect
     circle.classList.add("celebrate");
     setTimeout(() => {
       circle.classList.remove("celebrate");
+      resultDisplay.textContent = ""; // Clear result after animation
     }, 500);
     
     nextRound();
   } else {
-    // Wrong answer
     wrongCount++;
     streak = 0;
     
-    // Update displays
     streakDisplay.textContent = streak;
     wrongCountDisplay.textContent = wrongCount;
     
-    // Show wrong feedback
     resultDisplay.textContent = "Wrong!";
     resultDisplay.style.color = "#ff0000";
     
-    // Add shake effect
     circle.classList.add("shake");
     setTimeout(() => {
       circle.classList.remove("shake");
+      resultDisplay.textContent = ""; // Clear result after animation
     }, 500);
   }
   
-  // Update accuracy
   const totalAttempts = correctCount + wrongCount;
   const accuracy = totalAttempts > 0 ? Math.round((correctCount / totalAttempts) * 100) : 0;
   accuracyDisplay.textContent = `${accuracy}%`;
@@ -359,7 +267,6 @@ function endGame() {
   circle.style.backgroundColor = "";
   buttons.forEach(btn => btn.disabled = true);
   
-  // Update end screen stats
   finalScoreDisplay.textContent = score;
   highestStreakDisplay.textContent = highestStreak;
   totalCorrectDisplay.textContent = correctCount;
@@ -374,7 +281,7 @@ function saveScore(name, email, score) {
   const data = { name, email, score };
   fetch(WEB_APP_URL, {
     method: "POST",
-    mode: "no-cors", // Required for CodePen due to CORS restrictions
+    mode: "no-cors",
     headers: {
       "Content-Type": "application/json"
     },
@@ -392,18 +299,18 @@ function saveScore(name, email, score) {
 function showRankings() {
   fetch(WEB_APP_URL, {
     method: "GET",
-    mode: "cors" // Adjust based on your setup
+    mode: "cors"
   })
     .then(response => response.json())
     .then(data => {
       if (data.status === "success") {
-        rankingsBody.innerHTML = ""; // Clear previous rankings
+        rankingsBody.innerHTML = "";
         data.rankings.forEach(entry => {
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${entry.rank}</td>
             <td>${entry.name}</td>
-            <td>${entry.score}</td> <!-- Removed email column -->
+            <td>${entry.score}</td>
           `;
           rankingsBody.appendChild(row);
         });
@@ -425,10 +332,8 @@ scoreForm.addEventListener("submit", function(event) {
   const playerEmail = document.getElementById("playerEmail").value;
   const playerScore = score;
 
-  // Save the score to Google Sheets
   saveScore(playerName, playerEmail, playerScore);
 
-  // Show the "View Rankings" button
   scoreForm.style.display = "none";
   viewRankingsButton.style.display = "block";
 });
@@ -439,7 +344,7 @@ viewRankingsButton.addEventListener("click", showRankings);
 // Handle difficulty buttons
 difficultyButtons.forEach(btn => {
   btn.addEventListener("click", function() {
-    if (gameActive) return; // Don't change difficulty during game
+    if (gameActive) return;
     setDifficulty(this.dataset.difficulty);
   });
 });
@@ -453,14 +358,12 @@ modeButtons.forEach(btn => {
 
 // Handle play again
 playAgainButton.addEventListener("click", function() {
-  // Reset game state
   score = 0;
   timeLeft = 60;
   streak = 0;
   correctCount = 0;
   wrongCount = 0;
   
-  // Update displays
   scoreDisplay.textContent = score;
   timerDisplay.textContent = timeLeft;
   streakDisplay.textContent = streak;
@@ -468,53 +371,41 @@ playAgainButton.addEventListener("click", function() {
   wrongCountDisplay.textContent = wrongCount;
   accuracyDisplay.textContent = "0%";
   
-  // Reset button positions
   buttons.forEach(btn => {
     btn.style.position = "";
     btn.style.left = "";
     btn.style.top = "";
   });
   
-  // Reset circle position
   circle.style.position = "";
   circle.style.left = "";
   circle.style.top = "";
   
-  // Enable difficulty buttons
   difficultyButtons.forEach(btn => {
     btn.style.opacity = "1";
     btn.style.pointerEvents = "auto";
   });
   
-  // Reset game screens
   rankingsScreen.style.display = "none";
   endScreen.style.display = "none";
   scoreForm.style.display = "block";
   viewRankingsButton.style.display = "none";
   gameScreen.style.display = "block";
   
-  // Re-enable game buttons
   buttons.forEach(btn => btn.disabled = false);
   
-  // Show play button instead of starting game immediately
   createPlayButton();
 });
 
 // Initialize game
 document.addEventListener("DOMContentLoaded", function() {
-  // Set initial difficulty
   setDifficulty('easy');
-  
-  // Create play button to start the game
   createPlayButton();
 });
 
-// Updated applyButtonStyle to match the button appearance in the image
+// Updated applyButtonStyle to match the button appearance
 function applyButtonStyle(button) {
-  // Apply the same gradient background to all buttons (purple to cyan)
   button.style.background = "linear-gradient(to right, #FF00FF, #00FFFF)";
-
-  // Additional styling to match the rounded shape and glow
   button.style.border = "none";
   button.style.borderRadius = "25px";
   button.style.padding = "10px 20px";
